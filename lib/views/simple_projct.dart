@@ -5,6 +5,8 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -18,18 +20,20 @@ class MyApp extends StatelessWidget {
 }
 
 class HomePage extends StatelessWidget {
+  const HomePage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Instagram'),
+        title: const Text('Instagram'),
         actions: [
           IconButton(
-            icon: Icon(Icons.camera_alt),
+            icon: const Icon(Icons.camera_alt),
             onPressed: () {},
           ),
           IconButton(
-            icon: Icon(Icons.send),
+            icon: const Icon(Icons.send),
             onPressed: () {},
           ),
         ],
@@ -37,7 +41,7 @@ class HomePage extends StatelessWidget {
       body: Column(
         children: [
           // شريط القصص
-          Container(
+          SizedBox(
             height: 100.0,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
@@ -45,14 +49,14 @@ class HomePage extends StatelessWidget {
               itemBuilder: (context, index) {
                 return Container(
                   width: 70.0,
-                  margin: EdgeInsets.symmetric(horizontal: 5.0),
+                  margin: const EdgeInsets.symmetric(horizontal: 5.0),
                   child: Column(
                     children: [
-                      CircleAvatar(
+                      const CircleAvatar(
                         radius: 30.0,
                         backgroundColor: Colors.grey,
                       ),
-                      SizedBox(height: 5.0),
+                      const SizedBox(height: 5.0),
                       Text('User $index'),
                     ],
                   ),
@@ -61,7 +65,7 @@ class HomePage extends StatelessWidget {
             ),
           ),
           // محتوى الصفحة الرئيسي (يمكنك إضافة المزيد هنا)
-          Expanded(
+          const Expanded(
             child: Center(
               child: Text('Feed Content Here'),
             ),
@@ -69,7 +73,7 @@ class HomePage extends StatelessWidget {
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
-        items: [
+        items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'Home',
