@@ -28,7 +28,7 @@ class HomeView extends StatelessWidget {
           Align(
             alignment: Alignment.bottomCenter,
             child: Padding(
-              padding: const EdgeInsets.only(bottom: 20),
+              padding: const EdgeInsets.only(bottom: 50),
               child: ElevatedButton(
                 onPressed: () {
                   // Navigate to the Account Type screen

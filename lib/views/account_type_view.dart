@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'login_view.dart';
-import 'passenger_login_view.dart';
+
+import 'otp_view.dart';
 
 class AccountTypeView extends StatelessWidget {
   const AccountTypeView({super.key});
@@ -10,46 +10,40 @@ class AccountTypeView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Account Type'),
-        backgroundColor: const Color.fromRGBO(148, 118, 107, 1),
+        title: const Text('Phone Number'),
+        backgroundColor: Colors.brown,
       ),
       body: Stack(
         children: [
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
-                image: AssetImage('lib/assets/Pictures/logo.jpg'), // Path to your logo image
+                image: AssetImage('lib/assets/Pictures/taxi.jpg'),
                 fit: BoxFit.cover,
               ),
             ),
           ),
           Align(
-            alignment: Alignment.bottomCenter,
+            alignment: Alignment.center,
             child: Padding(
-              padding: const EdgeInsets.only(bottom: 90),
+              padding: const EdgeInsets.all(20.0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  // Phone number input with country picker
+                
+                  const SizedBox(height: 20), // Spacing
+                  // Login button
                   ElevatedButton(
                     onPressed: () {
-                      Get.to(() => const LoginView());
+                      // Direct navigation to OTP screen
+                      Get.to(() => const OTPView());
                     },
                     style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 100),
-                      textStyle: const TextStyle(fontSize: 24),
+                      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 100),
+                      textStyle: const TextStyle(fontSize: 20),
                     ),
-                    child: const Text('Driver'),
-                  ),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () {
-                      Get.to(() => const PassengerLoginView()); // Navigate to PassengerLoginView
-                    },
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 100),
-                      textStyle: const TextStyle(fontSize: 24),
-                    ),
-                    child: const Text('Passenger'),
+                    child: const Text('Login'),
                   ),
                 ],
               ),
