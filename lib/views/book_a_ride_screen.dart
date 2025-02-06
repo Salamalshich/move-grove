@@ -1,28 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:dio/dio.dart';
+import '../Controller/trip_controller.dart';
 
 class LocationScreen extends StatefulWidget {
   const LocationScreen({super.key});
 
   @override
-  _LocationScreenState createState() => _LocationScreenState();
+  State<LocationScreen> createState() => _LocationScreenState();
 }
 
 class _LocationScreenState extends State<LocationScreen> {
-  final List<String> provinces = [
-    'Damascus',
-    'Latakia',
-  ];
-
+  final List<String> provinces = ['Damascus', 'Latakia','Hasaka','Idlib','Homs','Quneitra','daraa',' rif dimashq','suwayda','al kamshlie','aleppo','tartus','hama','raqqa','hasakah','dei alzor'];
   String? selectedProvinceFrom;
   String? selectedProvinceTo;
   DateTime? selectedDate;
   TimeOfDay? selectedTime;
+  final TextEditingController notesController = TextEditingController();
+  final TextEditingController seatsController = TextEditingController();
+  final TextEditingController priceController = TextEditingController();
 
-  // Dio instance
-  final Dio _dio = Dio();
+  final TripController _controller = TripController();
 
-  // Function to open the date picker
   Future<void> _selectDate(BuildContext context) async {
     final DateTime currentDate = DateTime.now();
     final DateTime? picked = await showDatePicker(
@@ -31,7 +28,6 @@ class _LocationScreenState extends State<LocationScreen> {
       firstDate: currentDate,
       lastDate: DateTime(currentDate.year + 1),
     );
-
     if (picked != null) {
       setState(() {
         selectedDate = picked;
@@ -39,14 +35,12 @@ class _LocationScreenState extends State<LocationScreen> {
     }
   }
 
-  // Function to open the time picker
   Future<void> _selectTime(BuildContext context) async {
     final TimeOfDay currentTime = TimeOfDay.now();
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: selectedTime ?? currentTime,
     );
-
     if (picked != null) {
       setState(() {
         selectedTime = picked;
@@ -54,96 +48,68 @@ class _LocationScreenState extends State<LocationScreen> {
     }
   }
 
-  // Format the DateTime object to string
   String get formattedDate {
     if (selectedDate == null) return 'Select Date';
     return '${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2, '0')}-${selectedDate!.day.toString().padLeft(2, '0')}';
   }
 
-  // Format the TimeOfDay object to string
   String get formattedTime {
     if (selectedTime == null) return 'Select Time';
     return '${selectedTime!.hour.toString().padLeft(2, '0')}:${selectedTime!.minute.toString().padLeft(2, '0')}';
   }
 
-  // API Call Function
-  Future<void> _createTrip() async {
+  void _createTrip() {
     if (selectedProvinceFrom == null ||
         selectedProvinceTo == null ||
         selectedDate == null ||
-        selectedTime == null) {
+        selectedTime == null ||
+        notesController.text.isEmpty ||
+        seatsController.text.isEmpty ||
+        priceController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please fill in all fields before creating a trip.'),
-        ),
+        const SnackBar(content: Text('Please fill in all fields.')),
       );
       return;
     }
 
-    try {
-      final response = await _dio.post(
-        'http://movo-app.test/api/add-trip',
-        data: {
-          'from': selectedProvinceFrom,
-          'to': selectedProvinceTo,
-          'date': formattedDate,
-          'time': formattedTime,
-        },
-      );
+    print('hhhhhhhhhhhhhhhhhhhh');
+    _controller.createTrip(
+        context: context,
+        source_id: selectedProvinceFrom.toString(),
+        destination_id: selectedProvinceTo.toString(),
+        dateTime: selectedDate.toString(),
+        total_seats: seatsController.text.toString(),
+        price: priceController.text.toString(),
+        notes: notesController.text.toString()
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Trip created successfully!'),
-          ),
-        );
-        Navigator.pop(context); // Go back after successful creation
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to create trip. Please try again.'),
-          ),
-        );
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: ${e.toString()}'),
-        ),
-      );
-    }
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: const Text('Select Locations'),
-        backgroundColor: const Color.fromRGBO(148, 118, 107, 1),
+        title: const Text('Create a Trip'),
+        backgroundColor: Colors.brown,
       ),
-      body: Center(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color(0xFFCDB9B0), // لون فاتح
+              Color(0xFFAEB4BC), // لون داكن
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.9),
-              borderRadius: BorderRadius.circular(15),
-            ),
-            padding: const EdgeInsets.all(20.0),
+          child: SingleChildScrollView(
             child: Column(
-              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  "Create a Trip",
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                // From Dropdown
                 DropdownButtonFormField<String>(
                   value: selectedProvinceFrom,
                   items: provinces
@@ -152,23 +118,15 @@ class _LocationScreenState extends State<LocationScreen> {
                     child: Text(province),
                   ))
                       .toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      selectedProvinceFrom = value;
-                    });
-                  },
+                  onChanged: (value) =>
+                      setState(() => selectedProvinceFrom = value),
                   decoration: InputDecoration(
-                    labelText: 'Your Location',
+                    labelText: 'From',
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    filled: true,
-                    fillColor: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(10)),
                   ),
                 ),
-                const SizedBox(height: 20),
-
-                // To Dropdown
+                const SizedBox(height: 10),
                 DropdownButtonFormField<String>(
                   value: selectedProvinceTo,
                   items: provinces
@@ -177,73 +135,81 @@ class _LocationScreenState extends State<LocationScreen> {
                     child: Text(province),
                   ))
                       .toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      selectedProvinceTo = value;
-                    });
-                  },
+                  onChanged: (value) =>
+                      setState(() => selectedProvinceTo = value),
                   decoration: InputDecoration(
-                    labelText: 'Your Destination',
+                    labelText: 'To',
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    filled: true,
-                    fillColor: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(10)),
                   ),
                 ),
-                const SizedBox(height: 20),
-
-                // Date Picker
+                const SizedBox(height: 10),
                 GestureDetector(
                   onTap: () => _selectDate(context),
                   child: AbsorbPointer(
                     child: TextFormField(
                       controller: TextEditingController(text: formattedDate),
                       decoration: InputDecoration(
-                        labelText: 'Select Date',
+                        labelText: 'Date',
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        filled: true,
-                        fillColor: Colors.grey[200],
+                            borderRadius: BorderRadius.circular(10)),
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
-
-                // Time Picker
+                const SizedBox(height: 10),
                 GestureDetector(
                   onTap: () => _selectTime(context),
                   child: AbsorbPointer(
                     child: TextFormField(
                       controller: TextEditingController(text: formattedTime),
                       decoration: InputDecoration(
-                        labelText: 'Select Time',
+                        labelText: 'Time',
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        filled: true,
-                        fillColor: Colors.grey[200],
+                            borderRadius: BorderRadius.circular(10)),
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 30),
-
-                // Create Trip Button
-                ElevatedButton(
-                  onPressed: _createTrip,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.lightBlueAccent,
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 16,
-                      horizontal: 32,
-                    ),
+                const SizedBox(height: 10),
+                TextFormField(
+                  controller: seatsController,
+                  decoration: InputDecoration(
+                    labelText: 'Total Seats',
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10)),
                   ),
-                  child: const Text(
-                    "Create Trip",
-                    style: TextStyle(fontSize: 18),
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 10),
+                TextFormField(
+                  controller: priceController,
+                  decoration: InputDecoration(
+                    labelText: 'Price',
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10)),
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 10),
+                TextFormField(
+                  controller: notesController,
+                  decoration: InputDecoration(
+                    labelText: 'Notes',
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10)),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: _createTrip,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      padding:
+                      const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                    ),
+                    child: const Text('Create Trip'),
                   ),
                 ),
               ],
